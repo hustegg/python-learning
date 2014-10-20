@@ -1,2 +1,0 @@
-def qsort(*lst):
-  pass
