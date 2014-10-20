@@ -39,7 +39,7 @@ def bubbleSort3(*inList):
     flag = l - 2
     while flag > 0:
         j = 0
-        k = flag
+        k = flag  # the index of latest swappiness
         flag = 0
         while j <= k:
             if newList[j] > newList[j + 1]:
