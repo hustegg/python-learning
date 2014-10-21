@@ -84,7 +84,21 @@ def shellSort(*inList):
     
     return newList     
     
+def selectSort(*inList):
+    newList = list(inList)
+    l = len(newList)
+    i = 0
+    while i < l:
+        j = i + 1
+        minI = i
+        while j < l:
+            if newList[j] < newList[minI]:
+                minI = j
+            j += 1
+        swap(newList, i, minI)
+        i += 1
 
+    return newList
 
 
 
