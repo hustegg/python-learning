@@ -130,12 +130,25 @@ def mergeSort(inList):
     inList = _mergeSortCom(listL, listR)
     return inList
 
-
+def quickSort(inList, left, right):
+    if not left < right:
+        return
+    swap(inList, left, (left + right) / 2)
+    idx = left + 1
+    last = left
+    while idx <= right:
+        if inList[idx] < inList[left]:
+            last += 1
+            swap(inList, idx, last)
+        idx += 1
+    swap(inList, left, last)
+    quickSort(inList, left, last - 1)
+    quickSort(inList, last + 1, right)
 
 if __name__ == '__main__':
     print shellSort(314,15,926,53,5897,9323,84626,43383,279,502,88,41,97,16939,93,75,1058,209,74,9,445,9,23,07,8,16,40,62,862,0,8,99,8628,0,34,8,2,53)
     a = [314,15,926,53,5897,9323,84626,43383,279,502,88,41,97,16939,93,75,1058,209,74,9,445,9,23,07,8,16,40,62,862,0,8,99,8628,0,34,8,2,53]
-    print mergeSort(a)
-
+    quickSort(a, 0, len(a) - 1)
+    print a
 
 
