@@ -143,5 +143,3 @@ if __name__ == '__main__':
             pout(note)
         else:
             pout(displayNote(note))
-
-
