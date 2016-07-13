@@ -22,25 +22,17 @@ def parse_options():
 def pout(s):
     print s + ' ',
 
-def mkOctets(octStr):
-    if not octStr:
-        return None
-
-    octList = [ i for i in octStr.split(' ') if i ]
-
-    return octList
-
 def parseNote(octElem):
     if octElem in monoChars:
         return octElem
-        
+
     numNote = int(re.search(r'[1-7]', octElem).group())
     cSharp = octElem.count('#')
     cFall = octElem.count('b')
     cAdd = octElem.count('+')
     cDash = octElem.count('-')
 
-    note = gapMap[numNote - 1] + 1*cSharp + (-1)*cFall + 12*cAdd + (-12)*cDash
+    note = baseToneGap[numNote - 1] + 1*cSharp + (-1)*cFall + 12*cAdd + (-12)*cDash
 
     return note
 
@@ -49,9 +41,9 @@ def modNote(note):
     note -= valMajorMod
     return note
 
-def baseTone(tone):
-    for t in reversed(gapMap):
-        if tone >= t:
+def baseTone(note):
+    for t in reversed(baseToneGap):
+        if note >= t:
             return t
 
 
@@ -62,7 +54,7 @@ def displayNote(note):
     cSharp = locNote - numNote
     cAdd = max(note / 12, 0)
     cDash = abs(min(note / 12, 0))
-    return cAdd*'+' + cDash*'-' + cSharp*'#' + str(gapMap.index(numNote) + 1)
+    return cAdd*'+' + cDash*'-' + cSharp*'#' + str(baseToneGap.index(numNote) + 1)
 
 
 def checkMajor(wMajor):
@@ -96,20 +88,22 @@ if __name__ == '__main__':
 
     parser = parse_options()
     (options, args) = parser.parse_args()
-    srcMajor = options.srcMajor.upper()
-    tgtMajor = options.tgtMajor.upper()
+    srcMajor = options.srcMajor
+    tgtMajor = options.tgtMajor
     fileName = options.fileName
     noteChars = options.noteChars
 
-    octOrig = ""
+    octOrig = ''
     octList = []
     srcNoteList = []
     tgtNoteList = []
-    monoChars = ('0', '-', '|')
+    monoChars = ('0', '.', '-', '|', '\n', '')
     polyChars = ('+', '-')
-    validChars = ('0', '1', '2', '3', '4', '5', '6', '7', '+', '-', '#', 'b', '|')
-    valMajorMap = {'C':0, 'D':2, 'E':4, 'F':6, 'G':8, 'A':10, 'B':12}
-    gapMap = (0, 2, 4, 5, 7, 9, 11)
+    validChars = ('0', '1', '2', '3', '4', '5', '6', '7', '+', '-', '#', 'b', '|', '\n')
+    chords = ('C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B')
+    gapMap = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    baseToneGap = (0, 2, 4, 5, 7, 9, 11)
+    valMajorMap = dict(zip(chords, gapMap))
     valSrcMajor = valMajorMap[srcMajor]
     valTgtMajor = valMajorMap[tgtMajor]
     valMajorMod = valTgtMajor - valSrcMajor
@@ -120,17 +114,28 @@ if __name__ == '__main__':
 
     if os.path.isfile(fileName):
         with open(fileName, 'r') as f:
-            octOrig = f.read()
+            for l in f:
+                octOrig += ' \n '
+                octOrig += l.strip()
+            octOrig += ' \n '
     elif noteChars:
         octOrig = noteChars
     else:
         pout("Invalid input")
         sys.exit(1)
 
-    octList = [ str(i) for i in octOrig.split(' ') if checkNote(str(i)) ]
+    octList = [ str(i) for i in octOrig.split(" ") if checkNote(str(i)) ]
 
+    i = 0
+    j = 0
     for oct in octList:
-        srcNoteList.append(parseNote(oct))
+        if oct == '\n':
+            i += 1
+        try:
+            srcNoteList.append(parseNote(oct))
+            j += 1
+        except:
+            print "unrecognized note : [{0}] at ({1}, {2})".format(oct, i, j)
 
     for note in srcNoteList:
         if type(note) is types.IntType:
@@ -143,3 +148,5 @@ if __name__ == '__main__':
             pout(note)
         else:
             pout(displayNote(note))
+
+
