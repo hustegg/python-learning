@@ -96,7 +96,12 @@ def upload(inCur):
         vCurRow = vSQLFmt + ", ".join(vCurRowList)
 
         print vCurRow + ';'
-        vCnt = vCur.execute(vCurRow)        
+        try:
+            vCnt = vCur.execute(vCurRow)
+        except Exception as e:
+            vCnt = vCur.execute('ROLLBACK')
+            print traceback.format_exc()
+            raise MySQLdb.DataError("INSERT DATA ERROR")
     vCnt = vCur.execute('COMMIT')
 
 
@@ -145,9 +150,11 @@ try:
         print "What on earth do you want ?"
 
 except Exception as e:
-    print traceback.print_exc()
+    print traceback.format_exc()
 finally:
     scur.close()
     sdb.close()
+
+
 
 
