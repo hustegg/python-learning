@@ -77,13 +77,27 @@ def upload(inCur):
     vColName = vSheet.row_values(0)
     vSQLFmt = "INSERT INTO {0}.{1} SET ".format(gConf['DATABASE'], gConf['TABLE'])
 
-#    vCnt = vCur.execute('BEGIN')
+    vCnt = vCur.execute('BEGIN')
     print "BEGIN;"
     for r in xrange(1, vRowNum):
-        vCurRow = vSQLFmt + ", ".join([ "{0} = '{1}'".format(i, j.strip().encode(gConf['CHARSET'])) if isinstance(j, unicode) else "{0} = {1}".format(i, j) for i, j in zip(vColName, vSheet.row_values(r)) ])
+        vCurRowList = []
+        for i, j in zip(vColName, vSheet.row_values(r)):
+            if isinstance(j, float) and j.is_integer():
+                v = str(int(j))
+            elif isinstance(j, str):
+                v = "'" + j.strip() + "'"
+            elif isinstance(j, unicode):
+                v = "'" + j.strip().encode(gConf['CHARSET']) + "'"
+            else:
+                v = str(j)
+
+            c = i.encode('raw_unicode_escape')
+            vCurRowList.append(c + ' = ' + v)
+        vCurRow = vSQLFmt + ", ".join(vCurRowList)
+
         print vCurRow + ';'
-#    vCnt = vCur.execute(vCurRow)        
-#    vCnt = vCur.execute('ROLLBACK')
+        vCnt = vCur.execute(vCurRow)        
+    vCnt = vCur.execute('COMMIT')
 
 
     
@@ -135,7 +149,5 @@ except Exception as e:
 finally:
     scur.close()
     sdb.close()
-
-
 
 
